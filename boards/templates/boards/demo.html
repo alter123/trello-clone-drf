@@ -1,0 +1,266 @@
+<!-- Query series of cards for a list -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+		<link
+			rel="stylesheet"
+			href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+			integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+			crossorigin="anonymous"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Convergence"
+			rel="stylesheet"
+		/>
+
+		<title>DEMO</title>
+	</head>
+	<body>
+		<div class="row justify-content-md-center">
+			<div class="container">
+				<h1
+					style="padding-top:80px; text-align: center; padding-bottom:80px; font-family: Convergence"
+				>
+					Trello Card Swap Demo
+				</h1>
+				<div class="form-group row offset-md-3">
+					<label for="" class="col-sm-2 col-form-label">TOKEN</label>
+					<div class="col-lg-6">
+						<input
+							type="text"
+							class="form-control"
+							value="{{ token }}"
+							id="auth-token"
+						/>
+					</div>
+				</div>
+				<br />
+
+				<form id="change-pos-form">
+					<div class="form-inline offset-md-3">
+						<div class="form-group mx-2">
+							<input
+								type="text"
+								class="form-control"
+								id="card-pos"
+								placeholder="Card Id"
+							/>
+						</div>
+						<div class="form-group mx-2">
+							<input
+								type="text"
+								class="form-control"
+								id="new-pos"
+								placeholder="Id of card at new pos (0 for top)"
+							/>
+						</div>
+						<button class="btn btn-primary mx-2" type="submit">
+							CHANGE POSITION
+						</button>
+					</div>
+				</form>
+				<br />
+
+				<form class="form-inline offset-md-3" id="change-list-form">
+					<div class="form-group mx-2">
+						<input
+							type="text"
+							class="form-control"
+							id="card-list"
+							placeholder="Card Id"
+						/>
+					</div>
+					<div class="form-group mx-2">
+						<input
+							type="text"
+							class="form-control"
+							id="new-list"
+							placeholder="List Id"
+						/>
+					</div>
+					<button class="btn btn-primary mx-2" type="submit">
+						CHANGE LIST
+					</button>
+				</form>
+				<br />
+				<br />
+
+				<div class="row">
+					<div class="col offset-md-2">
+						<div class="card">
+							<div class="card-body">
+								<pre id="board-data"></pre>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script
+			src="https://code.jquery.com/jquery-3.4.1.js"
+			integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+			integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+			integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.6/dist/loadingoverlay.min.js"
+			integrity="sha256-5sCY8UkQVTdmecz8DUbNClEuG+7IX34AA4QEiFunQvk="
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.js"
+			integrity="sha256-7NgI/5l45Md7VEbs4MGG4HsRoHu+lXKQ/vUK1LvXDps="
+			crossorigin="anonymous"
+		></script>
+
+		<script type="text/javascript">
+			$(document).ready(function(e) {
+				// fetch card JSON
+				function fetchData() {
+					$.LoadingOverlay("show");
+					$.ajax({
+						type: "GET",
+						dataType: "json",
+						beforeSend: function(request) {
+							request.setRequestHeader(
+								"Authorization",
+								"Token " + $("#auth-token").val()
+							);
+						},
+						url: " https://trello-clone-drf.herokuapp.com/board/",
+						success: function(data) {
+							data = JSON.stringify(data, undefined, 2);
+							$("#board-data").html(data);
+							$.LoadingOverlay("hide");
+						}
+					});
+				}
+
+				// change card position
+				$("#change-pos-form").submit(function(e) {
+					e.preventDefault();
+
+					$.LoadingOverlay("show");
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						beforeSend: function(request) {
+							request.setRequestHeader(
+								"Authorization",
+								"Token " + $("#auth-token").val()
+							);
+						},
+						data: {
+							operation: "swap",
+							card: $("#card-pos").val(),
+							pos: $("#new-pos").val()
+						},
+						url: "https://trello-clone-drf.herokuapp.com/swap-demo/",
+						success: function(data) {
+							// console.log(data);
+							if (data.response == "Success") {
+								notifySuccess(data.message);
+							} else {
+								notifyFailure(data.message);
+							}
+							fetchData();
+							$.LoadingOverlay("hide");
+							// location.reload(true);
+						}
+					});
+					return false;
+					// Refetch the data!
+					// location.reload(true);
+				});
+
+				// swap card list
+				$("#change-list-form").submit(function(e) {
+					e.preventDefault();
+
+					$.LoadingOverlay("show");
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						beforeSend: function(request) {
+							request.setRequestHeader(
+								"Authorization",
+								"Token " + $("#auth-token").val()
+							);
+						},
+						data: {
+							operation: "swapList",
+							card: $("#card-list").val(),
+							pos: $("#new-list").val()
+						},
+						url: "https://trello-clone-drf.herokuapp.com/swap-demo/",
+						success: function(data) {
+							console.log(data);
+							if (data.response == "Success") {
+								notifySuccess(data.message);
+							} else {
+								notifyFailure(data.message);
+							}
+							fetchData();
+							$.LoadingOverlay("hide");
+							// location.reload(true);
+						}
+					});
+					return false;
+					// Refetch the data!
+					// location.reload(true);
+				});
+
+				$.notify.addStyle("happyblue", {
+					html:
+						"<div> <span style='font-size:20px;'>&#128512;</span> <span data-notify-text/></div>",
+					classes: {
+						base: {
+							"white-space": "nowrap",
+							"background-color": "lightblue",
+							padding: "5px"
+						},
+						superblue: {
+							color: "white",
+							"background-color": "blue"
+						}
+					}
+				});
+
+				function notifySuccess(msg) {
+					$.notify(msg, {
+						position: "right bottom",
+						style: "happyblue",
+						showDuration: 600
+					});
+					$("#card-pos").val(""), $("#new-pos").val("");
+					$("#card-list").val(""), $("#new-list").val("");
+				}
+
+				function notifyFailure(msg) {
+					$.notify(msg, {
+						position: "right bottom",
+						showDuration: 600
+						// style: "happyblue"
+					});
+					$("#card-pos").val(""), $("#new-pos").val("");
+					$("#card-list").val(""), $("#new-list").val("");
+				}
+
+				fetchData();
+			});
+		</script>
+	</body>
+</html>
