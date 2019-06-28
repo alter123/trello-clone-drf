@@ -1,4 +1,5 @@
 # Trello Clone DRF
+---
 Trello Clone API's using Django-Rest-Framework
 
 #### Features
@@ -20,9 +21,11 @@ Trello Clone API's using Django-Rest-Framework
 
 #### Demo
 ---
-[Demo for the endpoints](http://trello-clone-drf.herokuapp.com/).
-[Demo for card swapping](http://trello-clone-drf.herokuapp.com/swap-demo/).
+* [Demo for the endpoints](http://trello-clone-drf.herokuapp.com/).
+* [Demo for card swapping](http://trello-clone-drf.herokuapp.com/swap-demo/).
 
-*Demo Credentials:*
+*Credentials:*
+
 `username: demo01`
+
 `password: testuser`
